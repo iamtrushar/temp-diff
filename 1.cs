@@ -1,4 +1,4 @@
-        //--------------------------------------------------
+//--------------------------------------------------
         /// <summary>
         /// Roll up the mapping level polygons to the higher levels,
         /// reset map status code.
@@ -475,7 +475,7 @@
                     var legalsWithTractToBeReset = legalsWithTract
                         .Where(l => Enum.Parse<MapStatusCodes>(l.MAP_STATUS_CODE) == MapStatusCodes.DataChangedCheckMapping
                             || l.SPATIAL_ID is null
-                            || codeMapStatuses.Single(r => r.MAP_STATUS_CODE == l.MAP_STATUS_CODE).HAS_SPATIAL.AsBooleanValue() == false);
+                            || codeMapStatuses.Single(r => r.MAP_STATUS_CODE == l.MAP_STATUS_CODE).HAS_SPATIAL.Equals(Enum.GetName(CommonValues.N), StringComparison.OrdinalIgnoreCase));
 
                     foreach (var legal in legalsWithTractToBeReset)
                     {
@@ -523,7 +523,7 @@
                             && codeMapStatuses
                                 .Single(r => r.MAP_STATUS_CODE == l.MAP_STATUS_CODE)
                                 .HAS_SPATIAL
-                                .AsBooleanValue());
+                                .Equals(Enum.GetName(CommonValues.Y), StringComparison.OrdinalIgnoreCase));
                     if (mappedLegals > 0)
                     {
                         this._logger.Information(
@@ -585,7 +585,7 @@
                 [NotNull] string hasSpatial)
             {
                 return mappingLevel == "LEGAL"
-                    ? !hasSpatial.AsBooleanValue()
+                    ? !hasSpatial.Equals(Enum.GetName(CommonValues.Y), StringComparison.OrdinalIgnoreCase)
                     && mapStatusCode != MapStatusCodes.CheckRemark
                     // skip the MSC 7 and 11, the are set by AutoMapper
                     // which must not be reset MSC = 0 (Not Mapped)
@@ -594,7 +594,7 @@
                     && mapStatusCode != MapStatusCodes.MappingIssueNeedsDoc
                     // for mapping level agreement and tract
                     : (mapStatusCode == MapStatusCodes.DataChangedCheckMapping)
-                    || (hasSpatial.AsBooleanValue()
+                    || (hasSpatial.Equals(Enum.GetName(CommonValues.Y), StringComparison.OrdinalIgnoreCase)
                         && mapStatusCode != MapStatusCodes.CheckRemark
                         && mapStatusCode != MapStatusCodes.RemarkChangedCheckMapping
                         && mapStatusCode != MapStatusCodes.MappingIssueNeedsDoc);
@@ -623,13 +623,13 @@
             else // agreement with spatial
             {
                 // ReSharper disable once ConvertIfStatementToSwitchStatement
-                if (!hasSpatial.AsBooleanValue()
-                    && allowSpatialDelete.AsBooleanValue())
+                if (hasSpatial.Equals(Enum.GetName(CommonValues.N), StringComparison.OrdinalIgnoreCase)
+                    && allowSpatialDelete.Equals(Enum.GetName(CommonValues.Y), StringComparison.OrdinalIgnoreCase))
                 {
                     this.DeleteAgreementSpatial(agreementLevel.SPATIAL_ID, setLowerMapStatus: agreementLevel.MAPPING_LEVEL == "AGMT");
                 }
-                else if (!hasSpatial.AsBooleanValue()
-                    && !allowSpatialDelete.AsBooleanValue())
+                else if (hasSpatial.Equals(Enum.GetName(CommonValues.N), StringComparison.OrdinalIgnoreCase)
+                    && allowSpatialDelete.Equals(Enum.GetName(CommonValues.N), StringComparison.OrdinalIgnoreCase))
                 {
                     this._logger.Warning(
                         "Unable to delete polygon for qualifying MAP_STATUS_CODE='{MapStatusCode}' and HasSpatial='N' because AllowSpatialDelete='N' for AGMT_ID='{AgmtId}'",
@@ -664,8 +664,8 @@
                 allowSpatialDelete = matchingMapStatus.ALLOW_SPATIAL_DELETE;
 
                 // ReSharper disable once ConvertIfStatementToSwitchStatement
-                if (!hasSpatial.AsBooleanValue()
-                    && allowSpatialDelete.AsBooleanValue())
+                if (hasSpatial.Equals(Enum.GetName(CommonValues.N), StringComparison.OrdinalIgnoreCase)
+                    && allowSpatialDelete.Equals(Enum.GetName(CommonValues.Y), StringComparison.OrdinalIgnoreCase))
                 {
                     this._lpmTractSpatial.DeleteTractSpatial(
                         tract.SPATIAL_ID,
@@ -673,8 +673,8 @@
                         cascadeDelete: false,
                         rollup: true);
                 }
-                else if (!hasSpatial.AsBooleanValue()
-                    && !allowSpatialDelete.AsBooleanValue())
+                else if (hasSpatial.Equals(Enum.GetName(CommonValues.N), StringComparison.OrdinalIgnoreCase)
+                    && allowSpatialDelete.Equals(Enum.GetName(CommonValues.N), StringComparison.OrdinalIgnoreCase))
                 {
                     this._logger.Warning(
                         "Unable to delete polygon for qualifying MAP_STATUS_CODE='{MapStatusCode}' and HasSpatial='N' because AllowSpatialDelete='N' for TRACT_DETAIL_ID='{TractDetailId}'",
@@ -714,13 +714,13 @@
                     allowSpatialDelete = matchingMapStatus.ALLOW_SPATIAL_DELETE;
 
                     // ReSharper disable once ConvertIfStatementToSwitchStatement
-                    if (!hasSpatial.AsBooleanValue()
-                        && allowSpatialDelete.AsBooleanValue())
+                    if (hasSpatial.Equals(Enum.GetName(CommonValues.N), StringComparison.OrdinalIgnoreCase)
+                        && allowSpatialDelete.Equals(Enum.GetName(CommonValues.Y), StringComparison.OrdinalIgnoreCase))
                     {
                         this._lpmLegalSpatial.DeleteLegalSpatial(legal.SPATIAL_ID, rollup: true);
                     }
-                    else if (!hasSpatial.AsBooleanValue()
-                        && !allowSpatialDelete.AsBooleanValue())
+                    else if (hasSpatial.Equals(Enum.GetName(CommonValues.N), StringComparison.OrdinalIgnoreCase)
+                        && allowSpatialDelete.Equals(Enum.GetName(CommonValues.N), StringComparison.OrdinalIgnoreCase))
                     {
                         this._logger.Warning(
                             "Unable to delete polygon for qualifying MAP_STATUS_CODE='{MapStatusCode}' and HasSpatial='N' because AllowSpatialDelete='N' for LEGAL_DESC_ID='{LegalDescId}'",
